@@ -403,16 +403,27 @@ private:
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static void destroy_nodes_impl(Node *node) {
-    if (node==nullptr)
+    if (node == nullptr)
     {
       return;
     }
-
-    else
+    else if (node->right == nullptr && node->left == nullptr)
     {
-
+      delete node;
     }
-    assert(true);
+    else if (node->right == nullptr && node->left != nullptr)
+    {
+      destroy_nodes_impl(node->left);
+    }
+    else if (node->right != nullptr && node->left == nullptr)
+    {
+      destroy_nodes_impl(node->right);
+    }
+    else 
+    {
+      destroy_nodes_impl(node->right);
+      destroy_nodes_impl(node->left);
+    }
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -428,7 +439,33 @@ private:
   //       Two elements A and B are equivalent if and only if A is
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
-    assert(false);
+    if (empty_impl(node))
+    {
+      return nullptr;
+    }
+    else if (!less(node->datum, query) && !less(query, node->datum))
+    {
+      return node;
+    }
+    else if (!less(node->right->datum, query) && !less(query, node->right->datum))
+    {
+      return node->right;
+    }
+    else if (!less(node->left->datum, query) && !less(query, node->left->datum))
+    {
+      return node->left;
+    }
+    else if (node->right == nullptr && node->left != nullptr)
+    {
+      find_impl(node->left, query, less);
+    }
+    else if (node->right != nullptr && node->left == nullptr)
+    {
+      find_impl(node->right, query, less);
+    }
+    
+    return nullptr;
+    
   }
 
   // REQUIRES: item is not already contained in the tree rooted at 'node'
@@ -447,7 +484,8 @@ private:
   //       template, NOT according to the < operator. Use the "less"
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
-    assert(false);
+    assert(!empty_impl(node));
+    
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
