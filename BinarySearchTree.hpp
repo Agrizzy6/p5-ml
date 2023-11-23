@@ -330,7 +330,11 @@ private:
   // NOTE:    This function must run in constant time.
   //          No iteration or recursion is allowed.
   static bool empty_impl(const Node *node) {
-    assert(false);
+    if (node == nullptr)
+    {
+      return true;
+    }
+    return false;
   }
 
   // EFFECTS: Returns the size of the tree rooted at 'node', which is the
@@ -338,7 +342,16 @@ private:
   //          tree is 0.
   // NOTE:    This function must be tree recursive.
   static int size_impl(const Node *node) {
-    assert(false);
+    if (node == nullptr)
+    {
+      return 0;
+    }
+
+    else 
+    {
+      return size_impl(node->right) + 1;
+    }
+    
   }
 
   // EFFECTS: Returns the height of the tree rooted at 'node', which is the
@@ -346,6 +359,16 @@ private:
   //          The height of an empty tree is 0.
   // NOTE:    This function must be tree recursive.
   static int height_impl(const Node *node) {
+    //Compare each path
+    if (node == nullptr)
+    {
+      return 0;
+    }
+
+    else 
+    {
+      return height_impl(node->right) + 1;
+    }
     assert(false);
   }
 
@@ -354,13 +377,42 @@ private:
   //          tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
-    assert(false);
+
+  if (node->right == nullptr && node->left == nullptr)
+  {
+    Node *new_node = new Node(node);
+    return new_node;
+  }
+  else if (node->right == nullptr && node->left != nullptr)
+  {
+    return copy_nodes_impl(node->left);
+  }
+  else if (node->right != nullptr && node->left == nullptr)
+  {
+    return copy_nodes_impl(node->right);
+  }
+  else
+  {
+    Node *new_node = new Node(node);
+    new_node->left = copy_nodes_impl(node->left);
+    new_node->right = copy_nodes_impl(node->right);
+  }
+ 
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static void destroy_nodes_impl(Node *node) {
-    assert(false);
+    if (node==nullptr)
+    {
+      return;
+    }
+
+    else
+    {
+
+    }
+    assert(true);
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
