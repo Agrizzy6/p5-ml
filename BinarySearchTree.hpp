@@ -365,12 +365,20 @@ private:
     {
       return 0;
     }
-
     else 
     {
-      return height_impl(node->right) + 1;
+      int left = height_impl(node->left);
+      int right = height_impl(node->right);
+
+      if (left > right)
+      {
+        return left + 1;
+      }
+      else
+      {
+        return right + 1;
+      }
     }
-    assert(false);
   }
 
   // EFFECTS: Creates and returns a pointer to the root of a new node structure
@@ -485,43 +493,40 @@ private:
       new_node->datum = item;
       return new_node;
     }
-        
-    else if (node->right == nullptr && node->left != nullptr)
-    {
-      insert_impl(node->left, item, less);
-              std::cout << "ran" << std::endl;
 
-    }
-    else if (node->right != nullptr && node->left == nullptr)
+    else if (less(node->datum, item))
     {
-      insert_impl(node->right, item, less);
-              std::cout << "ran" << std::endl;
-
-    }
-    else if (node->left == nullptr && node->right == nullptr)
-    {
-      if (less(node->datum, item))
+      if (node->right != nullptr)
       {
-        Node *new_node = new Node();
-        new_node->datum = item;
+        insert_impl(node->right, item, less);
+      }
+      else
+      {
+        Node *new_node = new Node(item, nullptr, node->right);
         node->right = new_node;
         std::cout << "added right" << std::endl;
         return node; 
       }
-    
-      else if (less(item, node->datum))
+    }
+  
+    else if (less(item, node->datum))
+    {
+        if (node->left != nullptr)
       {
-        Node *new_node = new Node();
-        new_node->datum = item;
+        insert_impl(node->left, item, less);
+      }
+      else
+      {
+        Node *new_node = new Node(item, node->left, nullptr);
         node->left = new_node;
         std::cout << "added left" << std::endl;
         return node; 
       }
+  
     }
+    
+
     return node;
-
-   
-
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element

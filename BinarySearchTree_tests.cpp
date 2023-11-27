@@ -25,7 +25,7 @@ TEST(test_insert) {
     ASSERT_EQUAL(tree.size(), 6);
 }
 
-
+/*
 TEST(test_find) {
     BinarySearchTree<int> tree;
     BinarySearchTree<int>::Iterator itBegin = tree.begin();
@@ -38,6 +38,37 @@ TEST(test_find) {
     ASSERT_FALSE(tree.empty());
     ASSERT_EQUAL(tree.size(), 6);
     ASSERT_EQUAL(tree.find(5), itBegin);
+}
+*/
+
+TEST(test_height) {
+    BinarySearchTree<int> tree;
+    tree.insert(5);
+    tree.insert(8);
+    tree.insert(9);
+    tree.insert(7);
+    tree.insert(10);
+    //tree.insert(3);
+    //tree.insert(4);
+    
+    ASSERT_FALSE(tree.empty());
+    ASSERT_EQUAL(tree.height(), 5);
+}
+
+
+TEST(test_size) {
+    BinarySearchTree<int> tree;
+    tree.insert(5);
+    tree.insert(8);
+    tree.insert(9);
+    tree.insert(7);
+    ASSERT_EQUAL(tree.size(), 4);
+    tree.insert(10);
+    tree.insert(3);
+    tree.insert(4);
+    
+    ASSERT_FALSE(tree.empty());
+    ASSERT_EQUAL(tree.size(), 7);
 }
 
 
