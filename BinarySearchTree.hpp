@@ -284,6 +284,7 @@ public:
     assert(find(item) == end());
     root = insert_impl(root, item, less);
     return find(item);
+    
   }
 
   // EFFECTS: Returns a human-readable string representation of this
@@ -349,7 +350,7 @@ private:
 
     else 
     {
-      return size_impl(node->right) + 1;
+      return size_impl(node->right) + size_impl(node->left) + 1;
     }
     
   }
@@ -380,7 +381,7 @@ private:
 
   if (node->right == nullptr && node->left == nullptr)
   {
-    Node *new_node = new Node(node);
+    Node *new_node = new Node(node->datum);
     return new_node;
   }
   else if (node->right == nullptr && node->left != nullptr)
@@ -439,7 +440,7 @@ private:
   //       Two elements A and B are equivalent if and only if A is
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
-    if (empty_impl(node))
+    if (node == nullptr)
     {
       return nullptr;
     }
@@ -447,14 +448,7 @@ private:
     {
       return node;
     }
-    else if (!less(node->right->datum, query) && !less(query, node->right->datum))
-    {
-      return node->right;
-    }
-    else if (!less(node->left->datum, query) && !less(query, node->left->datum))
-    {
-      return node->left;
-    }
+    
     else if (node->right == nullptr && node->left != nullptr)
     {
       find_impl(node->left, query, less);
@@ -484,8 +478,50 @@ private:
   //       template, NOT according to the < operator. Use the "less"
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
-    assert(!empty_impl(node));
+    // assert contains function
+    if (node == nullptr)
+    {
+      Node *new_node = new Node();
+      new_node->datum = item;
+      return new_node;
+    }
+        
+    else if (node->right == nullptr && node->left != nullptr)
+    {
+      insert_impl(node->left, item, less);
+              std::cout << "ran" << std::endl;
+
+    }
+    else if (node->right != nullptr && node->left == nullptr)
+    {
+      insert_impl(node->right, item, less);
+              std::cout << "ran" << std::endl;
+
+    }
+    else if (node->left == nullptr && node->right == nullptr)
+    {
+      if (less(node->datum, item))
+      {
+        Node *new_node = new Node();
+        new_node->datum = item;
+        node->right = new_node;
+        std::cout << "added right" << std::endl;
+        return node; 
+      }
     
+      else if (less(item, node->datum))
+      {
+        Node *new_node = new Node();
+        new_node->datum = item;
+        node->left = new_node;
+        std::cout << "added left" << std::endl;
+        return node; 
+      }
+    }
+    return node;
+
+   
+
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
