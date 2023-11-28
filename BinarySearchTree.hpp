@@ -387,26 +387,22 @@ private:
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
 
-  if (node->right == nullptr && node->left == nullptr)
-  {
-    Node *new_node = new Node(node->datum);
+     Node *new_node = new Node();
+
+    if (node->right == nullptr && node->left == nullptr)
+    {
+      new_node->datum = node->datum;
+      
+    }
+    if (node->right != nullptr)
+    {
+      new_node->right = copy_nodes_impl(node->right);
+    }
+    if (node->left != nullptr)
+    {
+      new_node->left = copy_nodes_impl(node->right);
+    }
     return new_node;
-  }
-  else if (node->right == nullptr && node->left != nullptr)
-  {
-    return copy_nodes_impl(node->left);
-  }
-  else if (node->right != nullptr && node->left == nullptr)
-  {
-    return copy_nodes_impl(node->right);
-  }
-  else
-  {
-    Node *new_node = new Node(node);
-    new_node->left = copy_nodes_impl(node->left);
-    new_node->right = copy_nodes_impl(node->right);
-  }
- 
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
@@ -496,31 +492,31 @@ private:
 
     else if (less(node->datum, item))
     {
-      if (node->right != nullptr)
-      {
-        insert_impl(node->right, item, less);
-      }
-      else
+      if (node->right == nullptr || less(item, node->right->datum))
       {
         Node *new_node = new Node(item, nullptr, node->right);
         node->right = new_node;
         std::cout << "added right" << std::endl;
         return node; 
       }
+      else if (node->right != nullptr)
+      {
+        insert_impl(node->right, item, less);
+      }
     }
   
     else if (less(item, node->datum))
     {
-        if (node->left != nullptr)
+      if (node->left == nullptr || less(item, node->left->datum))
+        {
+          Node *new_node = new Node(item, node->left, nullptr);
+          node->left = new_node;
+          std::cout << "added left" << std::endl;
+          return node; 
+        }
+      else if (node->left != nullptr)
       {
         insert_impl(node->left, item, less);
-      }
-      else
-      {
-        Node *new_node = new Node(item, node->left, nullptr);
-        node->left = new_node;
-        std::cout << "added left" << std::endl;
-        return node; 
       }
   
     }

@@ -48,8 +48,8 @@ TEST(test_height) {
     tree.insert(9);
     tree.insert(7);
     tree.insert(10);
-    //tree.insert(3);
-    //tree.insert(4);
+    tree.insert(3);
+    tree.insert(4);
     
     ASSERT_FALSE(tree.empty());
     ASSERT_EQUAL(tree.height(), 5);
@@ -71,5 +71,24 @@ TEST(test_size) {
     ASSERT_EQUAL(tree.size(), 7);
 }
 
+TEST(test_copy) {
+    BinarySearchTree<int> tree;
+    tree.insert(5);
+    tree.insert(8);
+    tree.insert(2);
+    tree.insert(3);
+    //tree.insert(10);
+    //tree.insert(9);
+    ASSERT_FALSE(tree.empty());
+    ASSERT_EQUAL(tree.size(), 4);
+
+    BinarySearchTree<int> tree2;
+    ASSERT_TRUE(tree2.empty());
+    tree2 = tree;
+    ASSERT_FALSE(tree2.empty());
+    ASSERT_EQUAL(tree2.size(), 4);
+ 
+    
+}
 
 TEST_MAIN()
