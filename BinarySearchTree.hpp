@@ -389,10 +389,13 @@ private:
 
      Node *new_node = new Node();
 
-    if (node->right == nullptr && node->left == nullptr)
+    if (node != nullptr)
     {
       new_node->datum = node->datum;
-      
+    }
+    else if (node->right == nullptr && node->left == nullptr)
+    {
+      new_node->datum = node->datum;  
     }
     if (node->right != nullptr)
     {
@@ -400,7 +403,7 @@ private:
     }
     if (node->left != nullptr)
     {
-      new_node->left = copy_nodes_impl(node->right);
+      new_node->left = copy_nodes_impl(node->left);
     }
     return new_node;
   }
@@ -444,22 +447,25 @@ private:
   //       Two elements A and B are equivalent if and only if A is
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
+    
     if (node == nullptr)
     {
       return nullptr;
     }
+     
     else if (!less(node->datum, query) && !less(query, node->datum))
     {
       return node;
     }
-    
-    else if (node->right == nullptr && node->left != nullptr)
+
+    else if (less(query, node->datum) && node->left != nullptr)
     {
-      find_impl(node->left, query, less);
+      return find_impl(node->left, query, less);
     }
-    else if (node->right != nullptr && node->left == nullptr)
+    
+    else if (less(node->datum, query)  && node->right != nullptr)
     {
-      find_impl(node->right, query, less);
+      return find_impl(node->right, query, less);
     }
     
     return nullptr;
@@ -489,38 +495,34 @@ private:
       new_node->datum = item;
       return new_node;
     }
-
     else if (less(node->datum, item))
     {
-      if (node->right == nullptr || less(item, node->right->datum))
+      if (node->right != nullptr)
       {
-        Node *new_node = new Node(item, nullptr, node->right);
+        insert_impl(node->right, item, less);
+      }
+      else
+      {
+        Node *new_node = new Node(item, nullptr, nullptr);
         node->right = new_node;
         std::cout << "added right" << std::endl;
         return node; 
       }
-      else if (node->right != nullptr)
-      {
-        insert_impl(node->right, item, less);
-      }
     }
-  
     else if (less(item, node->datum))
     {
-      if (node->left == nullptr || less(item, node->left->datum))
-        {
-          Node *new_node = new Node(item, node->left, nullptr);
-          node->left = new_node;
-          std::cout << "added left" << std::endl;
-          return node; 
-        }
-      else if (node->left != nullptr)
+      if (node->left != nullptr)
       {
         insert_impl(node->left, item, less);
       }
-  
+      else
+      {
+        Node *new_node = new Node(item, nullptr, nullptr);
+        node->left = new_node;
+        std::cout << "added left" << std::endl;
+        return node; 
+      }
     }
-    
 
     return node;
   }
@@ -532,7 +534,7 @@ private:
   //       the iterator code that is provided for you.
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
-  static Node * min_element_impl(Node *node) {
+ static Node * min_element_impl(Node *node) {
     if(node == nullptr || node->left == nullptr){
       return node;
     }
@@ -589,7 +591,7 @@ private:
     }
     else{
       traverse_inorder_impl(node->left, os);
-      os << node->datum << " " << std::endl;
+      os << node->datum << " " ;
       traverse_inorder_impl(node->right, os);
     }
   }
@@ -606,7 +608,7 @@ private:
       return;
     }
     else{
-      os << node->datum << " " << std::endl;
+      os << node->datum << " " ;
       traverse_preorder_impl(node->left, os);
       traverse_preorder_impl(node->right, os);
     }
@@ -623,21 +625,65 @@ private:
   // HINT: At each step, compare 'val' the the current node (using the
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
-  static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
-    if(node->left == nullptr){
+   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) 
+   {
+
+   if (node == nullptr)
+   {
+    return nullptr;
+   }
+
+  // check left
+   if (less(val, node->datum) && node->left == nullptr)
+   {
+    return node;
+   }
+   else if (less(val, node->datum) && node->left != nullptr)
+   {
+    if (node->left->right == nullptr)
+    {
       return node;
     }
-    else if(node->left->datum == val || less(node->left->datum, val)){
-      if(node->left->right){
-        return min_greater_than_impl(node->left->right, val, less);
-      }
-      else{
-        return node;
-      }
-    }
-    else{
+    else
+    {
       return min_greater_than_impl(node->left, val, less);
     }
+   }
+
+
+  // check right
+  if (less(node->datum, val) && node->right == nullptr)
+   {
+    return nullptr;
+   }
+  else if (less(node->datum, val) && node->right != nullptr)
+   {
+    if (less(val, node->right->datum))
+    {
+      return node->right;
+    }
+    else
+    {
+      return min_greater_than_impl(node->right, val, less);
+    }
+    
+   }
+
+   //if equal
+   if (!less(val, node->datum) && !less(node->datum, val))
+   {
+    
+    if (node->right != nullptr)
+    {
+      return node->right;
+    }
+    else
+    {
+      return nullptr;
+    }
+   }
+
+   return nullptr;
   }
 
 
