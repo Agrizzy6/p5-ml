@@ -624,7 +624,20 @@ private:
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
-    assert(false);
+    if(node->left == nullptr){
+      return node;
+    }
+    else if(node->left->datum == val || less(node->left->datum, val)){
+      if(node->left->right){
+        return min_greater_than_impl(node->left->right, val, less);
+      }
+      else{
+        return node;
+      }
+    }
+    else{
+      return min_greater_than_impl(node->left, val, less);
+    }
   }
 
 

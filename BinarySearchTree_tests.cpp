@@ -91,4 +91,18 @@ TEST(test_copy) {
     
 }
 
+TEST(test_min_max){
+    BinarySearchTree<int> tree;
+    tree.insert(2);
+    tree.insert(3);
+    tree.insert(1);
+    tree.insert(10);
+    std::cout << *tree.max_element() << std::endl;
+    std::cout << *tree.min_element() << std::endl;
+    ASSERT_TRUE(*tree.max_element() == 10);
+    ASSERT_TRUE(*tree.min_element() == 1);
+}
+
+
+
 TEST_MAIN()
