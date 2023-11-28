@@ -563,9 +563,17 @@ private:
     if(node == nullptr){
       return true;
     }
-    else{
-      
+    else if(node->left != nullptr && less(node->datum, node->left->datum)){
+      return false;
     }
+    else if(node->right != nullptr && less(node->right->datum, node->datum)){
+      return false;
+    }
+    
+    bool left = check_sorting_invariant_impl(node->left, less);
+    bool right = check_sorting_invariant_impl(node->right, less);
+
+    return left && right;
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using an in-order traversal,
@@ -581,7 +589,7 @@ private:
     }
     else{
       traverse_inorder_impl(node->left, os);
-      os << node->data << " " << std::endl;
+      os << node->datum << " " << std::endl;
       traverse_inorder_impl(node->right, os);
     }
   }
@@ -598,7 +606,7 @@ private:
       return;
     }
     else{
-      os << node->data << " " << std::endl;
+      os << node->datum << " " << std::endl;
       traverse_preorder_impl(node->left, os);
       traverse_preorder_impl(node->right, os);
     }
