@@ -533,7 +533,12 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
   static Node * min_element_impl(Node *node) {
-    assert(false);
+    if(node == nullptr || node->left == nullptr){
+      return node;
+    }
+    else{
+      return min_element_impl(node->left);
+    }
   }
 
   // EFFECTS : Returns a pointer to the Node containing the maximum element
@@ -542,7 +547,12 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the largest element lives.
   static Node * max_element_impl(Node *node) {
-    assert(false);
+    if(node == nullptr || node->right == nullptr){
+      return node;
+    }
+    else{
+      return max_element_impl(node->right);
+    }
   }
 
 
@@ -550,7 +560,12 @@ private:
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
-    assert(false);
+    if(node == nullptr){
+      return true;
+    }
+    else{
+      
+    }
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using an in-order traversal,
@@ -561,7 +576,14 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if(node == nullptr){
+      return;
+    }
+    else{
+      traverse_inorder_impl(node->left, os);
+      os << node->data << " " << std::endl;
+      traverse_inorder_impl(node->right, os);
+    }
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using a pre-order traversal,
@@ -572,7 +594,14 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order
   //       for the definition of a pre-order traversal.
   static void traverse_preorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if(node == nullptr){
+      return;
+    }
+    else{
+      os << node->data << " " << std::endl;
+      traverse_preorder_impl(node->left, os);
+      traverse_preorder_impl(node->right, os);
+    }
   }
 
   // EFFECTS : Returns a pointer to the Node containing the smallest element
