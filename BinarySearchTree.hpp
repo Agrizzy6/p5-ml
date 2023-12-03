@@ -417,6 +417,7 @@ private:
     }
     else if (node->right == nullptr && node->left == nullptr)
     {
+      std::cout << "deleted node " << std::endl;
       delete node;
     }
     else if (node->right == nullptr && node->left != nullptr)
@@ -505,7 +506,7 @@ private:
       {
         Node *new_node = new Node(item, nullptr, nullptr);
         node->right = new_node;
-        std::cout << "added right" << std::endl;
+       // std::cout << "added right" << std::endl;
         return node; 
       }
     }
@@ -519,7 +520,7 @@ private:
       {
         Node *new_node = new Node(item, nullptr, nullptr);
         node->left = new_node;
-        std::cout << "added left" << std::endl;
+       // std::cout << "added left" << std::endl;
         return node; 
       }
     }

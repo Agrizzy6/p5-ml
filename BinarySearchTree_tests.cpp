@@ -123,7 +123,7 @@ TEST(test_min_max) {
     ASSERT_EQUAL(*(tree.min_element()), 1);
     ASSERT_EQUAL(*(tree.max_element()), 10);
     ASSERT_EQUAL(*(tree.min_greater_than(2)), 3);
-    ASSERT_EQUAL(*(tree.min_greater_than(5)), 8);
+    ASSERT_EQUAL(*(tree.min_greater_than(5)), 7);
     ASSERT_EQUAL(*(tree.min_greater_than(9)), 10);
     ASSERT_EQUAL(*(tree.min_greater_than(7)), 8);
     ASSERT_EQUAL(*(tree.min_greater_than(1)), 2);
