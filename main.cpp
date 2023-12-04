@@ -91,7 +91,7 @@ class Classifier {
     {
         return unique_word_set.size();
     }
-
+/*
     map<string, int>  train_posts_for_word()
     {
         //set<string>::iterator w;
@@ -114,17 +114,50 @@ class Classifier {
                         break;
                         
                     }
-                    //cout << "loop inner works" << endl;
                     source.clear();
-                }
-                //cout << "loop outer works" << endl;
-                
+                }                
             }
             posts_for_word.insert({w, posts_appear_in});
         }
         
         return posts_for_word;
     }
+*/
+    void train_posts_for_word()
+    {
+        csvstream open_train(train_in);
+        map<string, string> row;
+        while (open_train >> row) 
+            {
+                istringstream source(row["content"]);
+                string word;
+                set<string> found_words;
+                while (source >> word) 
+                {
+                    if (posts_for_word.find(word) == posts_for_word.end())
+                    {
+                        posts_for_word.insert({word, 1});
+                        found_words.insert(word);
+                    }
+                    else if (found_words.find(word) == found_words.end())
+                    {
+                        posts_for_word.find(word)->second += 1;
+                        found_words.insert(word);
+                    }
+                    //source.clear();
+                }                
+            }
+    }
+
+
+
+
+
+
+
+
+
+
 
     map<string, int> train_posts_for_label()
     {        
@@ -152,10 +185,9 @@ class Classifier {
         
         return posts_for_label;
     }
-
+/*
     map<pair<string, string>, int> train_posts_for_word_and_label()
     {
-
         map<string, string> row;
         for (auto label: unique_label_set)
         {
@@ -193,6 +225,32 @@ class Classifier {
         }
         return posts_for_word_and_label;
     }
+*/
+ map<pair<string, string>, int> train_posts_for_word_and_label()
+    {
+        csvstream open_train(train_in);
+        map<string, string> row;
+        while (open_train >> row)
+        {
+            istringstream source(row["content"]);
+            string w;
+            set<string> found_words;
+            while (source >> w)
+            {
+                if (posts_for_word_and_label.find({row["tag"], w}) == posts_for_word_and_label.end())
+                {
+                    posts_for_word_and_label.insert({{row["tag"], w}, 1});
+                    found_words.insert(w);
+                }
+                else if (found_words.find(w) == found_words.end())
+                {
+                    posts_for_word_and_label.find({row["tag"], w})->second += 1;
+                    found_words.insert(w);
+                }
+            } 
+        }
+        return posts_for_word_and_label;
+    }
 
     void compute_log_prior()
     {
@@ -219,7 +277,6 @@ class Classifier {
 
     void compute_log_probability(string test_in)
     {
-        
        // map<string, string> row;
        // map<string, double> log_probs;
        
@@ -265,6 +322,13 @@ class Classifier {
                 if (largest_log.first == "" && largest_log.second == 0)
                 {
                     largest_log = {label.first, current_log};
+                }
+                else if (current_log == largest_log.second)
+                {
+                    if (label.first[0] < largest_log.first[0])
+                    {
+                        largest_log = {label.first, current_log};
+                    }
                 }
                 else if (current_log > largest_log.second)
                 {
@@ -387,17 +451,16 @@ int main(int argc, char *argv[]) {
 
     test.unique_labels();
     test.train_posts_for_label();
-    
     test.train_posts_for_word();
-    //test.train_posts_for_word_and_label();
-    //test.compute_log_likelihood();
-    //test.compute_log_prior();
+    test.train_posts_for_word_and_label();
+    test.compute_log_likelihood();
+    test.compute_log_prior();
 
     //test.print_map();
 
-    //test.debug_Train();
+    test.debug_Train();
 
-    //test.compute_log_probability(testing);
+    test.compute_log_probability(testing);
     return 0;
 }
 
