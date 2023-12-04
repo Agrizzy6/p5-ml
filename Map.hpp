@@ -20,7 +20,8 @@
 #include <utility>  //pair
 
 template <typename Key_type, typename Value_type,
-          typename Key_compare=std::less<Key_type>> // default argument
+          typename Key_compare=std::less<Key_type> // default argument
+         >
 class Map {
 
 private:
@@ -120,14 +121,29 @@ public:
   //           false. Otherwise, inserts the given element and returns
   //           an iterator to the newly inserted element, along with
   //           the value true.
-  std::pair<Iterator, bool> insert(const Pair_type &val);
+    std::pair<Iterator, bool> insert(const Pair_type &val)
+    {
+      if (tree.find({val.first, Value_type()}) != tree.end())
+      {
+        return std::pair(tree.find({val.first, Value_type()}), false);
+      }
+      else
+      {
+        tree.insert({val.first, val.second});
+        return std::pair(tree.find({val.first, Value_type()}), true);
+      }
+      return std::pair(tree.end(), false);
+    }
+
 
   // EFFECTS : Returns an iterator to the first key-value pair in this Map.
-  Iterator begin() const;
+  Iterator begin() const{
+    return tree.begin();
+  }
 
   // EFFECTS : Returns an iterator to "past-the-end".
   Iterator end() const{
-    return Iterator();
+    return tree.end();
   }
 
 private:
