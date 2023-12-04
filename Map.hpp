@@ -88,7 +88,7 @@ public:
   //       (key, value) pairs, you'll need to construct a dummy value
   //       using "Value_type()".
   Iterator find(const Key_type& k) const{
-    Iterator f = tree.find(k);
+    Iterator f = tree.find({k, Value_type()});
     return f;
   }
 
@@ -108,7 +108,9 @@ public:
   //           that element. This ensures the proper value-initialization is done.
   //
   // HINT: http://www.cplusplus.com/reference/map/map/operator[]/
-  Value_type& operator[](const Key_type& k);
+  Value_type& operator[](const Key_type& k){
+
+  }
 
   // MODIFIES: this
   // EFFECTS : Inserts the given element into this Map if the given key
@@ -121,7 +123,12 @@ public:
   std::pair<Iterator, bool> insert(const Pair_type &val);
 
   // EFFECTS : Returns an iterator to the first key-value pair in this Map.
-  Iterator begin() const;
+  Iterator begin() const{
+    if(tree.root == nullptr){
+      return Iterator();
+    }
+    return Iterator(tree.root, min_element_impl(tree.root), PairComp);
+  }
 
   // EFFECTS : Returns an iterator to "past-the-end".
   Iterator end() const{
