@@ -20,8 +20,7 @@
 #include <utility>  //pair
 
 template <typename Key_type, typename Value_type,
-          typename Key_compare=std::less<Key_type> // default argument
-         >
+          typename Key_compare=std::less<Key_type>> // default argument
 class Map {
 
 private:
@@ -124,12 +123,7 @@ public:
   std::pair<Iterator, bool> insert(const Pair_type &val);
 
   // EFFECTS : Returns an iterator to the first key-value pair in this Map.
-  Iterator begin() const{
-    if(tree.root == nullptr){
-      return Iterator();
-    }
-    return Iterator(tree.root, min_element_impl(tree.root), PairComp);
-  }
+  Iterator begin() const;
 
   // EFFECTS : Returns an iterator to "past-the-end".
   Iterator end() const{
