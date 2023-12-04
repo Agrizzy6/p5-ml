@@ -35,7 +35,7 @@ private:
     private:
       Key_compare less;
     public:
-      bool operator()(std::pair<Key_type, Value_type> &pair1, std::pair<Key_type, Value_type> &pair2) const{
+      bool operator()(Pair_type pair1, Pair_type pair2) const{
         return less(pair1.first, pair2.first);
       }
   };
@@ -109,7 +109,8 @@ public:
   //
   // HINT: http://www.cplusplus.com/reference/map/map/operator[]/
   Value_type& operator[](const Key_type& k){
-
+    std::pair<Iterator, bool> f = insert({k, Value_type()});
+    return f.first->second;
   }
 
   // MODIFIES: this
