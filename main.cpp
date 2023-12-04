@@ -294,26 +294,32 @@ class Classifier {
                 current_log += label.second;
                 istringstream source(row["content"]);
                 string w;
+                set<string> found_words;
                 while (source >> w)
                 {
                     //cout << w << endl;
                      // check if word is in word for label training set
                     // increment log prob for label for post
                     pair<string, string> w_and_l(label.first, w);
-                    if (log_likelihoods.count(w_and_l) == 1)
+                    if (log_likelihoods.count(w_and_l) == 1 && found_words.find(w) == found_words.end())
                     {
                         //cout<<"ran1" <<endl;
                         current_log += log_likelihoods[w_and_l];
+                        found_words.insert(w);
                     }
-                    else if (posts_for_word.find(w) != posts_for_word.end())
+                    else if (posts_for_word.find(w) != posts_for_word.end() && found_words.find(w) == found_words.end())
                     {
                         //cout<<"ran2" <<endl;
                         current_log += log(posts_for_word[w])-log(num_posts);
+                        found_words.insert(w);
+
                     }
-                    else
+                    else if (found_words.find(w) == found_words.end())
                     {
                         //cout<<"ran3" <<endl;
                         current_log += log(1)-log(num_posts);
+                        found_words.insert(w);
+
                     }
                     //source.clear();
                 }
