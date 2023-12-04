@@ -12,6 +12,17 @@ class Classifier {
         train_in = filein;
         debugOn = do_debug;
         
+        if (debugOn)
+        {
+            cout << "training data:" << endl;
+            csvstream open_train(train_in);
+            map<string, string> row;
+            while (open_train >> row)
+            {
+                cout << "  " << "label = " << row["tag"] << ", content = " << row["content"] << endl;
+            }
+
+        }
     }
     
 
@@ -27,30 +38,31 @@ class Classifier {
         }
 
         num_posts = posts_count;
+        cout << "trained on " << num_posts << " examples" << endl;
         return posts_count;
     }
 
     // EFFECTS: Return a set of unique whitespace delimited words.x
     set<string> unique_words() {
-        string large_string = "";
-
         csvstream open_train(train_in);
         map<string, string> row;
 
+        istringstream source(row["content"]);
+        string word;
         while (open_train >> row) {
-            large_string += row["content"];
-            large_string += " ";
+            istringstream source(row["content"]);
+            string word;
+            while (source >> word)
+            {
+                unique_word_set.insert(word);
+            }
         }
 
-        cout << large_string << endl;
-        istringstream source(large_string);
-        set<string> words;
-        string word;
-        while (source >> word) {
-            words.insert(word);
+        if (debugOn)
+        {
+            cout << "vocabulary size = " << unique_word_set.size() << endl;
         }
-        unique_word_set = words;
-        return words;
+        return unique_word_set;
     }
 
     set<string> unique_labels() {
@@ -64,7 +76,7 @@ class Classifier {
             large_string += " ";
         }
 
-        cout << large_string << endl;
+        //cout << large_string << endl;
         istringstream source(large_string);
         set<string> labels;
         string label;
@@ -115,9 +127,7 @@ class Classifier {
     }
 
     map<string, int> train_posts_for_label()
-    {
-        //set<string>::iterator C;
-        
+    {        
         map<string, string> row;
         for (auto l : unique_label_set)
         {
@@ -143,43 +153,43 @@ class Classifier {
         return posts_for_label;
     }
 
-    map<string, map<string, int>> train_posts_for_word_and_label()
+    map<pair<string, string>, int> train_posts_for_word_and_label()
     {
-  
-        //inner map
-        map<string, int> label_and_int;
-        
-        //open file
-        csvstream open_train(train_in);
+
         map<string, string> row;
-        //add labels to map
-        for (auto word: unique_word_set)
+        for (auto label: unique_label_set)
         {
-            int posts_appear_in = 0;
-            for (auto label: unique_label_set)
+            for (auto word : unique_word_set)
             {
-                while (open_train >> row) 
+                int posts_appear_in = 0;
+                csvstream open_train(train_in);
+                //cout << word << endl;
+                while (open_train >> row)
                 {
-                    istringstream source(row["tag"]);
-                    string l;
-                    if (l == label)
+                    if (label == row["tag"])
                     {
+                        //cout << label << endl;
                         istringstream source(row["content"]);
+                        //cout << source.str() << endl;
                         string w;
-                         while (source >> word) 
-                         {
+                        while (source >> w)
+                        {
                             if (w == word)
                             {
                                 posts_appear_in++;
                                 break;
                             }
-                         }
-
-                    }
+                        }
+                        //source.clear();
+                    } 
                 }
-                label_and_int.insert({label, posts_appear_in});
-                posts_for_word_and_label.insert({word, label_and_int});
+                if (posts_appear_in != 0)
+                {
+                    posts_for_word_and_label.insert({{label, word}, posts_appear_in});
+                }
+                //posts_for_word_and_label.insert({{word, label}, posts_appear_in});
             }
+    
         }
         return posts_for_word_and_label;
     }
@@ -189,7 +199,7 @@ class Classifier {
         for (auto label: posts_for_label)
         {
 
-            double lnPC = log(label.second/num_posts);
+            double lnPC = log(label.second)-log(num_posts);
             log_priors.insert({label.first, lnPC});
 
         }        
@@ -199,118 +209,104 @@ class Classifier {
     {
         for (auto word: posts_for_word_and_label)
         {
-            double lnPwC = log((word.second.begin()->second)/num_posts);
-            cout<< lnPwC<<endl; 
-            log_likelihoods.insert({{word.first, word.second.begin()->first}, lnPwC});
+            double lnPwC = log(word.second)-log(posts_for_label[word.first.first]);
+            //cout<< lnPwC <<endl; 
+            log_likelihoods.insert({{word.first.first, word.first.second}, lnPwC});
         }    
-        cout << log_likelihoods.size() << endl;
+        //cout << log_likelihoods.size() << endl;
         //cout << log_likelihoods.first.begin()->first << log_likelihoods.begin()->second << endl;
     }
 
-    pair<string, double> compute_log_probability(string test_in)
+    void compute_log_probability(string test_in)
     {
         
-        map<string, string> row;
-        map<string, double> log_probs;
+       // map<string, string> row;
+       // map<string, double> log_probs;
        
-        // iterate over labels
-        for (auto label : log_priors)
-        {
-            csvstream open_test(test_in);
-
-            double current_log = 0.0;
-            current_log += log_priors[label.first];
-             // iterate over posts
-             while (open_test >> row) 
+       cout << "test data:" << endl;
+       csvstream open_test(test_in);
+       map<string, string> row;
+       pair <int, int> num_correct = {0, 0};
+       while(open_test >> row)
+       {
+            pair<string, double> largest_log;
+            for (auto label : log_priors)
             {
+                //pair<string, double> log_prob;
+                double current_log = 0.0;
+                current_log += label.second;
                 istringstream source(row["content"]);
-                string word;
-                // iterate over words in posts
-                while (source >> word) 
+                string w;
+                while (source >> w)
                 {
-                    // check if word is in word for label training set
+                    //cout << w << endl;
+                     // check if word is in word for label training set
                     // increment log prob for label for post
-                    pair<string, string> w_and_l(word, label.first);
+                    pair<string, string> w_and_l(label.first, w);
                     if (log_likelihoods.count(w_and_l) == 1)
                     {
+                        //cout<<"ran1" <<endl;
                         current_log += log_likelihoods[w_and_l];
                     }
-                    else if (unique_word_set.count(word) == 1)
+                    else if (posts_for_word.find(w) != posts_for_word.end())
                     {
-                        current_log += log(posts_for_word[word]/num_posts);
+                        //cout<<"ran2" <<endl;
+                        current_log += log(posts_for_word[w])-log(num_posts);
                     }
                     else
                     {
-                        current_log += 1/num_posts;
+                        //cout<<"ran3" <<endl;
+                        current_log += log(1)-log(num_posts);
                     }
-                    source.clear();
+                    //source.clear();
+                }
+                //cout << label.first << endl;
+                //cout << current_log << endl;
+                if (largest_log.first == "" && largest_log.second == 0)
+                {
+                    largest_log = {label.first, current_log};
+                }
+                else if (current_log > largest_log.second)
+                {
+                    largest_log = {label.first, current_log};
                 }
                 
             }
-            log_probs.insert({label.first, current_log});
-        }
-        
-        pair<string, double> largest_log;
-        map<string, double>::iterator it = log_probs.begin();
-        //find largest value
-        // NEED TO CHECK FOR EQUALS
-        for (auto label : log_probs)
-        {
-            if (it == log_probs.begin())
-            {
-                largest_log.first = it->first;
-                largest_log.second = it->second;
-            }
+            //cout << largest_log.first << " " << largest_log.second << endl;
 
-            it++;
-            if (it->second > largest_log.second)
-            {
-                largest_log.first = it->first;
-                largest_log.second = it->second;
-            }
-            else if (it == log_probs.end())
-            {
-                break;
-            }
 
-            
-        }
-
-        return largest_log;
+            istringstream source(row["content"]);
+            cout << "  " << "correct = " << row["tag"] <<", predicted = " << largest_log.first << ", log-probability score = " << largest_log.second << endl;
+            cout << "  " << "content = " << source.str() << endl << endl;
+            if (row["tag"] == largest_log.first)
+            {
+                num_correct.first += 1;
+            }
+            num_correct.second += 1;
+        }  
+        cout << "  " << "performance: " << num_correct.first << " / " << num_correct.second << " posts predicted correctly" << endl;
     }
 
+    void debug_Train()
+    {
+        if (debugOn)
+        {
+            cout << "classes:" << endl;
+            for (auto label : log_priors)
+            {
+                cout << "  " << label.first << ", " << posts_for_label[label.first] << " examples, log_prior = " << label.second << endl;
+            }
 
+            cout << "classifier parameters:" << endl;
+            for (auto WandL : log_likelihoods)
+            {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                cout << "  " << WandL.first.first << ":" << WandL.first.second << ", count = " << posts_for_word_and_label[{WandL.first.first, WandL.first.second}] <<
+                ", log-likelihood = " << WandL.second << endl;
+            }
+            cout << endl;
+        }
+    }
 
 
 
@@ -321,8 +317,8 @@ class Classifier {
     /// testing
     void print_map()
     {
-        for (auto i : posts_for_label){
-            cout << i.first << " \t\t\t " << i.second << endl; 
+        for (auto i : posts_for_word_and_label){
+            cout << i.first.first << ", " << i.first.second << " \t\t\t " << i.second << endl; 
         }
     }
 
@@ -331,7 +327,6 @@ class Classifier {
         bool debugOn;
 
         int num_posts;
-        //int unique_words;
 
         set<string> unique_word_set;
         set<string> unique_label_set;
@@ -340,7 +335,7 @@ class Classifier {
         map<string, int> posts_for_label;
         map<string, double> log_priors;
         map<pair<string, string>, double> log_likelihoods;
-        map<string, map<string, int>> posts_for_word_and_label;
+        map<pair<string, string>, int> posts_for_word_and_label;
 };
 
 
@@ -383,25 +378,26 @@ int main(int argc, char *argv[]) {
     }
 
 
-    cout << "Hello World!\n";
+   // cout << "Hello World!\n";
 
     Classifier test = Classifier(training, debug);
-    cout << test.train_num_posts() << endl;
+    test.train_num_posts();
     test.unique_words();
-    cout << test.train_unique_words() << endl;
+    cout << endl;
+
     test.unique_labels();
-    cout << test.unique_labels().size() << endl;
-
-    test.train_posts_for_word();
     test.train_posts_for_label();
-    test.print_map();
+    
+    test.train_posts_for_word();
+    //test.train_posts_for_word_and_label();
+    //test.compute_log_likelihood();
+    //test.compute_log_prior();
 
-    test.compute_log_likelihood();
-    test.compute_log_prior();
-    cout << test.compute_log_probability(testing).first << endl;
-    cout << test.compute_log_probability(testing).second << endl;
+    //test.print_map();
 
+    //test.debug_Train();
 
+    //test.compute_log_probability(testing);
     return 0;
 }
 
